@@ -1,3 +1,4 @@
+using HealthCheck;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -26,6 +27,9 @@ namespace health_check
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+            
+            services.AddHealthChecks()
+                .AddCheck<ICMPHealthCheck>("ICMP");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +53,7 @@ namespace health_check
                 {
                     // Disable caching for all static files.
                     context.Context.Response.Headers["Cache-Control"] =
-                        Configuration["StaticFiles:Headers:Cache-Control"]; ;
+                        Configuration["StaticFiles:Headers:Cache-Control"];
                     context.Context.Response.Headers["Pragma"] =
                         Configuration["StaticFiles:Headers:Pragma"];
                     context.Context.Response.Headers["Expires"] =
@@ -62,6 +66,8 @@ namespace health_check
             }
 
             app.UseRouting();
+
+            app.UseHealthChecks("/hc");
 
             app.UseEndpoints(endpoints =>
             {
